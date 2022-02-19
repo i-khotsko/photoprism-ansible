@@ -1,0 +1,23 @@
+photoprism:
+  hosts:
+    132.226.196.29:
+  vars:
+    ansible_user: opc
+    ansible_port: 22
+proxy:
+  hosts:
+    132.226.196.29:
+  vars:
+    ansible_user: opc
+    ansible_port: 22
+db:
+    hosts:
+    132.226.196.29:
+  vars:
+    ansible_user: opc
+    ansible_port: 22
+vault:
+  children:
+    db:
+    photoprism:
+    proxy:

@@ -1,0 +1,6 @@
+*.retry
+.idea
+*.swp
+venv
+*.pyc
+.vault.pass
