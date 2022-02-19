@@ -1,0 +1,32 @@
+- name: Ensure directories
+  file:
+    state: directory
+    dest: "{{ ansible_env.HOME }}/{{ item }}"
+  with_items:
+    - conf
+    - conf/proxy
+    - conf/proxy/data
+
+- name: Generate traefik.yaml
+  template:
+    src: traefik.yaml.j2
+    dest: "{{ ansible_env.HOME }}/conf/proxy/traefik.yaml"
+
+- name: run proxy container
+  docker_container:
+    name: "prism-proxy"
+    state: started
+    recreate: yes
+    image: "{{proxy_image}}"
+    ports:
+      - "80:80"
+      - "443:443"
+    restart_policy: always
+    volumes:
+      - "{{ ansible_env.HOME }}/conf/proxy/traefik.yaml:/etc/traefik/traefik.yaml"
+      - "{{ ansible_env.HOME }}/conf/proxy/data:/data"
+      - /var/run/docker.sock:/var/run/docker.sock
+    log_driver: json-file
+    log_options:
+      max-size: "50m"
+      max-file: "10"
