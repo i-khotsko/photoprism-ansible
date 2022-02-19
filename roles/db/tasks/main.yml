@@ -17,7 +17,6 @@
       traefik.enable: "false"
     ports:
       - "0.0.0.0:3306:3306"
-    restart_policy: always
     volumes:
       - "{{ ansible_env.HOME }}/data/db:/var/lib/mysql"
     command: mysqld --innodb-buffer-pool-size=128M --transaction-isolation=READ-COMMITTED --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max-connections=512 --innodb-rollback-on-timeout=OFF --innodb-lock-wait-timeout=120
