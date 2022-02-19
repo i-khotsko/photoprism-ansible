@@ -1,4 +1,5 @@
 - hosts: db
+  gather_facts: yes
   serial: 1
   tasks:
     - include_role:

@@ -1,4 +1,7 @@
-photoprism_site_url: https://photos.firefly.by/
+domain: photos.firefly.by
+photoprism_site_url: "https://{{domain}}/"
 proxy_image: traefik:v2.6
 photoprism_image: photoprism/photoprism:20220121
 
+photoprism_db_name: photoprism
+photoprism_db_user: photoprism

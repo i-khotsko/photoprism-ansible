@@ -17,11 +17,13 @@
     name: "prism-proxy"
     state: started
     recreate: yes
+    restart_policy: always
     image: "{{proxy_image}}"
     ports:
       - "80:80"
       - "443:443"
-    restart_policy: always
+    labels:
+      traefik.enable: "false"
     volumes:
       - "{{ ansible_env.HOME }}/conf/proxy/traefik.yaml:/etc/traefik/traefik.yaml"
       - "{{ ansible_env.HOME }}/conf/proxy/data:/data"

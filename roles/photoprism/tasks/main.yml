@@ -7,17 +7,19 @@
     - conf/photoprism
     - photoprism-import
 
-- name: run proxy container
+- name: run photoprism container
   docker_container:
     name: "prism-app"
     state: started
+    restart_policy: always
     recreate: yes
     labels:
-      traefik.http.routers.photoprism.rule: "Host(`photos.firefly.by`)"
+      traefik.enable: "true"
+      traefik.http.routers.photoprism.rule: "Host(`{{domain}}`)"
       traefik.http.routers.photoprism.tls: "true"
       traefik.http.routers.photoprism.tls.certresolver: "myresolver"
     env:
-      PHOTOPRISM_ADMIN_PASSWORD: "{{prism_ADMIN_PASSWORD}}"
+      PHOTOPRISM_ADMIN_PASSWORD: "{{prism_admin_pass}}"
       PHOTOPRISM_SITE_URL: "{{photoprism_site_url}}"
       PHOTOPRISM_ORIGINALS_LIMIT: "5000"
       PHOTOPRISM_HTTP_COMPRESSION: "gzip"
@@ -36,20 +38,21 @@
       PHOTOPRISM_DETECT_NSFW: "false"
       PHOTOPRISM_UPLOAD_NSFW: "true"
       PHOTOPRISM_DATABASE_DRIVER: "mysql"
-      PHOTOPRISM_DATABASE_SERVER: "mariadb:3306"
-      PHOTOPRISM_DATABASE_NAME: "photoprism"
-      PHOTOPRISM_DATABASE_USER: "photoprism"
-      PHOTOPRISM_DATABASE_PASSWORD: "{{prism_DATABASE_PASSWORD}}"
-      PHOTOPRISM_SITE_TITLE: "photos.firefly.by"
+      PHOTOPRISM_DATABASE_SERVER: "prism-db:3306"
+      PHOTOPRISM_DATABASE_NAME: "{{photoprism_db_name}}"
+      PHOTOPRISM_DATABASE_USER: "{{photoprism_db_user}}"
+      PHOTOPRISM_DATABASE_PASSWORD: "{{prism_user_pass}}"
+      PHOTOPRISM_SITE_TITLE: "{{domain}}"
       PHOTOPRISM_SITE_CAPTION: "Browse My Life"
       PHOTOPRISM_SITE_DESCRIPTION: ""
-      PHOTOPRISM_SITE_AUTHOR: "Igor Khotko"
+      PHOTOPRISM_SITE_AUTHOR: "My Life"
       HOME: "/photoprism"
     working_dir: "/photoprism"
     image: "{{photoprism_image}}"
     ports:
       - "2342:2342"
-    restart_policy: always
+    links:
+      - "prism-db:prism-db"
     volumes:
       - "/mnt/data/originals:/photoprism/originals"
       - "{{ ansible_env.HOME }}/photoprism-import:/photoprism/import"
@@ -58,4 +61,3 @@
     log_options:
       max-size: "50m"
       max-file: "10"
-

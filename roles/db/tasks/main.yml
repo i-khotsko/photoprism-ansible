@@ -1,0 +1,29 @@
+- name: Ensure directories
+  file:
+    state: directory
+    dest: "{{ ansible_env.HOME }}/{{ item }}"
+  with_items:
+    - data
+    - data/db
+
+- name: run db container
+  docker_container:
+    name: "prism-db"
+    state: started
+    restart_policy: always
+    recreate: yes
+    image: mariadb:10.6
+    labels:
+      traefik.enable: "false"
+    ports:
+      - "0.0.0.0:3306:3306"
+    restart_policy: always
+    volumes:
+      - "{{ ansible_env.HOME }}/data/db:/var/lib/mysql"
+    command: mysqld --innodb-buffer-pool-size=128M --transaction-isolation=READ-COMMITTED --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max-connections=512 --innodb-rollback-on-timeout=OFF --innodb-lock-wait-timeout=120
+    env:
+      MYSQL_ROOT_PASSWORD: "{{db_root_pass}}"
+      MYSQL_DATABASE: "{{photoprism_db_name}}"
+      MYSQL_USER: "{{photoprism_db_user}}"
+      MYSQL_PASSWORD: "{{prism_user_pass}}"
+
