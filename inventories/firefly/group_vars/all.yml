@@ -1,1 +1,4 @@
+photoprism_site_url: https://photos.firefly.by/
 proxy_image: traefik:v2.6
+photoprism_image: photoprism/photoprism:20220121
+

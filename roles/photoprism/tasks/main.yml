@@ -1,0 +1,61 @@
+- name: Ensure directories
+  file:
+    state: directory
+    dest: "{{ ansible_env.HOME }}/{{ item }}"
+  with_items:
+    - conf
+    - conf/photoprism
+    - photoprism-import
+
+- name: run proxy container
+  docker_container:
+    name: "prism-app"
+    state: started
+    recreate: yes
+    labels:
+      traefik.http.routers.photoprism.rule: "Host(`photos.firefly.by`)"
+      traefik.http.routers.photoprism.tls: "true"
+      traefik.http.routers.photoprism.tls.certresolver: "myresolver"
+    env:
+      PHOTOPRISM_ADMIN_PASSWORD: "{{prism_ADMIN_PASSWORD}}"
+      PHOTOPRISM_SITE_URL: "{{photoprism_site_url}}"
+      PHOTOPRISM_ORIGINALS_LIMIT: "5000"
+      PHOTOPRISM_HTTP_COMPRESSION: "gzip"
+      PHOTOPRISM_DEBUG: "false"
+      PHOTOPRISM_PUBLIC: "false"
+      PHOTOPRISM_READONLY: "false"
+      PHOTOPRISM_EXPERIMENTAL: "false"
+      PHOTOPRISM_DISABLE_CHOWN: "false"
+      PHOTOPRISM_DISABLE_WEBDAV: "false"
+      PHOTOPRISM_DISABLE_SETTINGS: "false"
+      PHOTOPRISM_DISABLE_TENSORFLOW: "false"
+      PHOTOPRISM_DISABLE_FACES: "false"
+      PHOTOPRISM_FACE_SIZE: "90"
+      PHOTOPRISM_DISABLE_CLASSIFICATION: "false"
+      PHOTOPRISM_DARKTABLE_PRESETS: "false"
+      PHOTOPRISM_DETECT_NSFW: "false"
+      PHOTOPRISM_UPLOAD_NSFW: "true"
+      PHOTOPRISM_DATABASE_DRIVER: "mysql"
+      PHOTOPRISM_DATABASE_SERVER: "mariadb:3306"
+      PHOTOPRISM_DATABASE_NAME: "photoprism"
+      PHOTOPRISM_DATABASE_USER: "photoprism"
+      PHOTOPRISM_DATABASE_PASSWORD: "{{prism_DATABASE_PASSWORD}}"
+      PHOTOPRISM_SITE_TITLE: "photos.firefly.by"
+      PHOTOPRISM_SITE_CAPTION: "Browse My Life"
+      PHOTOPRISM_SITE_DESCRIPTION: ""
+      PHOTOPRISM_SITE_AUTHOR: "Igor Khotko"
+      HOME: "/photoprism"
+    working_dir: "/photoprism"
+    image: "{{photoprism_image}}"
+    ports:
+      - "2342:2342"
+    restart_policy: always
+    volumes:
+      - "/mnt/data/originals:/photoprism/originals"
+      - "{{ ansible_env.HOME }}/photoprism-import:/photoprism/import"
+      - "/mnt/data/storage:/photoprism/storage"
+    log_driver: json-file
+    log_options:
+      max-size: "50m"
+      max-file: "10"
+
